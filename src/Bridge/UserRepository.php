@@ -36,10 +36,14 @@ class UserRepository implements UserRepositoryInterface
             throw new RuntimeException('Unable to determine user model from configuration.');
         }
 
+        if (is_null($user_field = config('auth.providers.users.user_field'))) {
+            throw new RuntimeException('Unable to determine user_field from configuration.');
+        }
+
         if (method_exists($model, 'findForPassport')) {
             $user = (new $model)->findForPassport($username);
         } else {
-            $user = (new $model)->where('email', $username)->first();
+            $user = (new $model)->where($user_field, $username)->first();
         }
 
         if (! $user || ! $this->hasher->check($password, $user->password)) {
